@@ -1,6 +1,6 @@
 # tree2query
 
-Simple app to convert rule from Scikit-Learn decision tree into a SQL query.
+Simple app to convert rule from Scikit-learn decision tree into a SQL query.
 
 <img src="example.png" alt="example" width="800"/>
 
@@ -55,10 +55,12 @@ Output:
 
 ```sql
 SELECT
-CASE WHEN petal width (cm) <= 0.80 THEN 0
-ELSE
-   CASE WHEN petal width (cm) <= 1.75 THEN 1
-   ELSE 2 END AS my_column
+   CASE WHEN petal width (cm) <= 0.80 THEN 0
+   ELSE
+      CASE WHEN petal width (cm) <= 1.75 THEN 1
+      ELSE 2
+      END
+   END AS my_column
 FROM dev_table
 ```
 
