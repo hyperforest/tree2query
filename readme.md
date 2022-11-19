@@ -1,6 +1,6 @@
 # tree2query
 
-Simple app to convert an text-exported Scikit-Learn decision tree into a SQL query.
+Simple app to convert rule from Scikit-Learn decision tree into a SQL query.
 
 <img src="example.png" alt="example" width="800"/>
 
@@ -23,8 +23,32 @@ optional arguments:
 
 # Example
 
+Suppose that we have a decision tree exported from Scikit-Learn as `./sample/classification_tree.txt`, which can be generated as follows
+
+```python
+import sys
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+model = DecisionTreeClassifier()
+model.fit(X, y)
+with open('./sample/classification_tree.txt', 'w') as f:
+    sys.stdout = f
+    print(export_text(model, feature_names=iris.feature_names))
+```
+
+Then, we can convert it into a SQL query as follows
+
 ```bash
-python main.py -p ./sample/classification_tree.txt -s ./sample/classification_tree.sql -c my_column -t dev_table -b 4
+python main.py \
+  -p ./sample/classification_tree.txt \
+  -s ./sample/classification_tree.sql \
+  -c my_column \
+  -t dev_table \
+  -b 4
 ```
 
 Output:
@@ -38,11 +62,13 @@ ELSE
 FROM dev_table
 ```
 
-# Current Limitations
-- Only supports numerical features
-- Only supports decision tree
-- Features should only contains letters, numbers, and underscores
+# Notes
+Features should only contains letters, numbers, and underscores in order to work properly.
 
-# TODO
+## Current Limitations
+- Only supports numerical features
+- Only supports a single decision tree
+
+## TODO
 - Support categorical features
 - Support multiple trees (random forest, gradient boosting, etc.)
