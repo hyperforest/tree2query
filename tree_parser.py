@@ -31,7 +31,7 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
         row = row.strip()
 
         depth = row.count('|')
-        indent = depth * spacing        
+        indent = depth * tab
         else_flag = False
         
         if depth > stack[-1]:
@@ -73,7 +73,7 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
             after = '' # handle cases to put END
             if i < len(rule) - 1:
                 if rule[i + 1].count('|') <= stack[-2]:
-                    after = f"\n{' ' * spacing * (depth - 1)}END"
+                    after = f"\n{' ' * tab * (depth - 1)}END"
             
             text = f" {text}{after}"
             _print(text)
@@ -83,7 +83,7 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
                 text = f"\n{' ' * indent}ELSE"
                 _print(text)
             else:
-                start_idx = (spacing + 1) * depth + 1
+                start_idx = depth * spacing + depth + 1
                 text = row[start_idx:]
                 text = f"\n{' ' * indent}CASE WHEN {text} THEN"
                 _print(text)
@@ -91,7 +91,7 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
     _debug(stack)
     
     while stack[-1] > 0:
-        text = f"\n{' ' * spacing * stack[-1]}END"
+        text = f"\n{' ' * tab * stack[-1]}END"
         if stack[-1] == 1:
              text += f" AS {column_name}\nFROM {src_table};\n"
 
