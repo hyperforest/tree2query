@@ -5,4 +5,4 @@ SELECT
       ELSE 2
       END
    END AS value
-FROM my_table
+FROM my_table;

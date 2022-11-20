@@ -23,4 +23,4 @@ SELECT
         END
     ELSE 92
     END AS value
-FROM my_table
+FROM my_table;

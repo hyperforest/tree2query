@@ -2,6 +2,16 @@ import sys
 
 DEBUG = False
 
+def _debug(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
+
+
+def _print(*args, end='', **kwargs):
+    if not DEBUG:
+        print(*args, end=end, **kwargs)
+
+
 def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_table', tab=4):
     OUT = sys.stdout
     if not DEBUG:
@@ -15,8 +25,7 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
     node_type = 'split'
     stack = [0]
 
-    if not DEBUG:
-        print('SELECT', end='')
+    _print('SELECT')
 
     for i, row in enumerate(rule):
         row = row.strip()
@@ -32,13 +41,11 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
             if depth < stack[-1]:
                 stack.pop()
                 while stack[-1] != depth:
-                    if not DEBUG:
-                        text = '\n' + ' ' * tab * stack[-1] + 'END'
-                        print(text, end='')
+                    text = f"\n{' ' * tab * stack[-1]}END"
+                    _print(text)
                     stack.pop()
         
-        if DEBUG:
-            print(row, stack)
+        _debug(row, stack)
 
         # infer node type
         node_type = 'leaf'
@@ -66,32 +73,29 @@ def parse_tree(path, save_to='query.sql', column_name='value', src_table='my_tab
             after = '' # handle cases to put END
             if i < len(rule) - 1:
                 if rule[i + 1].count('|') <= stack[-2]:
-                    after = '\n' + ' ' * spacing * (depth - 1) + 'END'
+                    after = f"\n{' ' * spacing * (depth - 1)}END"
             
             text = f" {text}{after}"
-            
-            if not DEBUG:
-                print(text, end='')
-        else:
-            end, text = '', ''
+            _print(text)
+        else: # split/internal node
+            text = ''
             if else_flag:
-                text = '\n' + ' ' * indent + 'ELSE'
-                if not DEBUG:
-                    print(text, end='')
+                text = f"\n{' ' * indent}ELSE"
+                _print(text)
             else:
                 start_idx = (spacing + 1) * depth + 1
                 text = row[start_idx:]
-                text = f"\n{' ' * indent}{end}CASE WHEN {text} THEN"
-                if not DEBUG:
-                    print(text, end='')
+                text = f"\n{' ' * indent}CASE WHEN {text} THEN"
+                _print(text)
 
-    if DEBUG:
-        print(stack)
-    else:
-        if stack[-1] > 1:
-            text = '\n' + ' ' * spacing * stack[-1] + 'END'
-            print(text, end='')
-        
-        print(f"\n{' ' * spacing}END AS {column_name}")
-        print(f"FROM {src_table}")
+    _debug(stack)
+    
+    while stack[-1] > 0:
+        text = f"\n{' ' * spacing * stack[-1]}END"
+        if stack[-1] == 1:
+             text += f" AS {column_name}\nFROM {src_table};\n"
+
+        _print(text)
+        stack.pop()
+    
     sys.stdout = OUT
